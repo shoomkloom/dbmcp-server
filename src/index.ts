@@ -5,16 +5,15 @@ import { randomUUID } from 'node:crypto';
 import NodeCache from 'node-cache';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
-//@@ import dotenv from 'dotenv';
-// dotenv.config();
 
 import { createMcpServer } from './server/index';
 
 const app = express();
 app.use(express.json());
+app.set('trust proxy', true);
 app.use(
   cors({
-    origin: 'http://localhost:3000', // Adjust this to your mcp client app's origin
+    origin: '*', // Adjust this to your mcp client app's origin
     exposedHeaders: ['mcp-session-id'],
     allowedHeaders: ['Content-Type', 'mcp-session-id', 'mcp-protocol-version', 'mongodb-password'],
   })
@@ -62,9 +61,6 @@ app.post('/mcp/:srvString', async (req, res) => {
     // Create a fresh MCP server instance with the per-session mongoUri
     const mcpServer = createMcpServer({ mongoUri: mongoConnectionString });
     await mcpServer.connect(transport);
-
-    //@@sessionData = { transport };
-    //@@transportCache.set(sessionId || transport.sessionId, sessionData);
   } 
   else if (!sessionData || !sessionData.transport) {
     res.status(400).json({
@@ -122,7 +118,37 @@ app.get('/mcp', handleSessionRequest);
 // Handle DELETE requests for session termination
 app.delete('/mcp', handleSessionRequest);
 
-const PORT = process.env.PORT || 3001;
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>DBMCP Server</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            background-color: #fdfdfd;
+            text-align: center;
+            padding: 50px;
+          }
+          h1 {
+            color: #333;
+          }
+          p {
+            color: #555;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>DBMCP Server</h1>
+        <p>The server is running.</p>
+        <p>Check out <a href="https://dbmcp.me">dbmcp.me</a> for connection details.</p>
+      </body>
+    </html>
+  `);
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`DBMCP Server running on port ${PORT}`);
 });
