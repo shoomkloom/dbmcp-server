@@ -29,12 +29,12 @@ const transportCache = new NodeCache({
 });
 
 // Handle POST requests for client-to-server communication
-app.post('/mcp/:srvString', async (req, res) => {
+app.post('/mcp', async (req, res) => {
   const sessionId = req.headers['mcp-session-id'];
   const mongodbPassword = req.query.mongodbpassword as string;
-  console.log(`POST /mcp/${req.params.srvString} invoked with sessionId = ${sessionId}`);
+  console.log(`POST /mcp with ${req.query.srvString} invoked with sessionId = ${sessionId}`);
 
-  const mongoConnectionString = getMongoConnectionString(req.params.srvString, mongodbPassword);
+  const mongoConnectionString = getMongoConnectionString(req.query.srvString as string, mongodbPassword);
 
   type SessionData = { transport: StreamableHTTPServerTransport };
   
@@ -83,16 +83,17 @@ app.post('/mcp/:srvString', async (req, res) => {
 });
 
 function getMongoConnectionString(srvString: string, password: string) {
-  // Match: mongodb_srv_<username>_<host>
-  const match = srvString.match(/^mongodb_srv_([^_]+)_(.+)$/);
+  const decodedConnectionString = decodeURIComponent(srvString).replace('mongodb srv', 'mongodb+srv');
+  const mongoRegex = /^mongodb(?:\+srv)?:\/\/([^:@]+)(?::([^@]*))?@([^\s/]+)\/?/;
+  const match = decodedConnectionString.match(mongoRegex);
 
   if (!match) {
     throw new Error("Invalid SRV string format");
   }
 
   const username = match[1];
-  const host = match[2];
-  return `mongodb+srv://${username}:${password}@${host}/`;
+  const completeConnectionString = decodedConnectionString.replace(`mongodb+srv://${username}`, `mongodb+srv://${username}:${password}`);
+  return completeConnectionString;
 }
 
 // Reusable handler for GET and DELETE requests
