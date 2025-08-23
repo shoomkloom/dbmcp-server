@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import NodeCache from 'node-cache';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 import { createMcpServer } from './server/index';
 
@@ -41,17 +42,14 @@ app.post('/mcp/:srvString', async (req, res) => {
   if (typeof sessionId === 'string') {
     sessionData = transportCache.get(sessionId) as SessionData | null;
   }
+
   let transport = sessionData ? sessionData.transport : null;
   if (!transport && isInitializeRequest(req.body)) {
     transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       onsessioninitialized: (newSessionId) => {
         transportCache.set(newSessionId, { transport });
-      },
-      // DNS rebinding protection is disabled by default for backwards compatibility.
-      // When running this server locally, make sure to set it to true!!!
-      enableDnsRebindingProtection: true,
-      allowedHosts: ['127.0.0.1', 'localhost', 'localhost:3000']
+      }
     });
 
     transport.onclose = () => {
@@ -118,35 +116,18 @@ app.get('/mcp', handleSessionRequest);
 // Handle DELETE requests for session termination
 app.delete('/mcp', handleSessionRequest);
 
-app.get('/', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>DBMCP Server</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            background-color: #fdfdfd;
-            text-align: center;
-            padding: 50px;
-          }
-          h1 {
-            color: #333;
-          }
-          p {
-            color: #555;
-          }
-        </style>
-      </head>
-      <body>
-        <h1>DBMCP Server</h1>
-        <p>The server is running.</p>
-        <p>Check out <a href="https://dbmcp.me">dbmcp.me</a> for connection details.</p>
-      </body>
-    </html>
-  `);
-});
+//IMPORTNT: Add this last so all MCP requests are handled before the proxy
+app.use(
+  '/',
+  createProxyMiddleware({
+    target: 'http://localhost:4200',
+    changeOrigin: true,
+    ws: true,
+    pathRewrite: {
+      '^/': '/', // optional, keeps paths intact
+    },
+  })
+);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -22,6 +22,7 @@
     "@modelcontextprotocol/sdk": "^1.17.3",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "http-proxy-middleware": "^3.0.5",
     "mongodb": "^6.18.0",
     "mongodb-log-writer": "^2.4.1",
     "mongodb-redact": "^1.1.8",
