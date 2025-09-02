@@ -37,7 +37,6 @@ app.post('/mcp', async (req, res) => {
   const mongoConnectionString = getMongoConnectionString(req.query.srvString as string, mongodbPassword);
 
   type SessionData = { transport: StreamableHTTPServerTransport };
-  
   let sessionData: SessionData | null = null;
   if (typeof sessionId === 'string') {
     sessionData = transportCache.get(sessionId) as SessionData | null;
@@ -87,13 +86,18 @@ function getMongoConnectionString(srvString: string, password: string) {
   const mongoRegex = /^mongodb(?:\+srv)?:\/\/([^:@]+)(?::([^@]*))?@([^\s/]+)\/?/;
   const match = decodedConnectionString.match(mongoRegex);
 
-  if (!match) {
+  if(match) {
+    const username = match[1];
+    if(decodedConnectionString.startsWith('mongodb+srv://')) {
+      return decodedConnectionString.replace(`mongodb+srv://${username}`, `mongodb+srv://${username}:${password}`);
+    }
+    else if(decodedConnectionString.startsWith('mongodb://')) {
+      return decodedConnectionString.replace(`mongodb://${username}`, `mongodb://${username}:${password}`);
+    }
+  }
+  else{
     throw new Error("Invalid SRV string format");
   }
-
-  const username = match[1];
-  const completeConnectionString = decodedConnectionString.replace(`mongodb+srv://${username}`, `mongodb+srv://${username}:${password}`);
-  return completeConnectionString;
 }
 
 // Reusable handler for GET and DELETE requests
