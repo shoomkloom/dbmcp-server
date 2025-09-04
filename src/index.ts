@@ -25,9 +25,6 @@ app.use(
 if (!process.env.APP_URL) {
   throw new Error('APP_URL is not set');
 }
-if (/dbmcp\.me$/i.test(new URL(process.env.APP_URL).hostname)) {
-  console.warn('⚠️ APP_URL looks like your custom domain. If this server serves that domain, this will loop!');
-}
 
 // Store transports by session ID
 const transportCache = new NodeCache({
@@ -44,7 +41,7 @@ app.get('/_health', (_req, res) => res.status(200).send('ok'));
 app.post('/mcp', async (req, res) => {
   const sessionId = req.headers['mcp-session-id'];
   const mongodbPassword = req.query.mongodbpassword as string;
-  console.log(`POST /mcp with ${req.query.srvString} invoked with sessionId = ${sessionId}`);
+  console.log(`POST /mcp invoked with sessionId = ${sessionId}`);
 
   const mongoConnectionString = getMongoConnectionString(req.query.srvString as string, mongodbPassword);
 
