@@ -17,7 +17,7 @@ export function createListMongoTool(context: MongoToolContext) {
         throw new Error('No MongoDB URI provided for this session.');
       }
 
-      //console.log(`Connecting to MongoDB with URI: ${mongoUri}`);
+      console.log(`Connecting to MongoDB...`);
 
       const client = new MongoClient(mongoUri);
 
