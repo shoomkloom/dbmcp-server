@@ -16,7 +16,7 @@ export abstract class MongoDBToolBase extends ToolBase {
             throw new Error('No MongoDB URI provided for this session.');
         }
 
-        console.log(`Connecting to MongoDB with URI: ${mongoUri}`);
+        //console.log(`Connecting to MongoDB with URI: ${mongoUri}`);
 
         const client = new MongoClient(mongoUri);
         return client.connect();
