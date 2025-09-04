@@ -21,6 +21,14 @@ app.use(
   })
 );
 
+// Helpful: fail fast on bad config
+if (!process.env.APP_URL) {
+  throw new Error('APP_URL is not set');
+}
+if (/dbmcp\.me$/i.test(new URL(process.env.APP_URL).hostname)) {
+  console.warn('⚠️ APP_URL looks like your custom domain. If this server serves that domain, this will loop!');
+}
+
 // Store transports by session ID
 const transportCache = new NodeCache({
   stdTTL: 3600, // 1-hour expiry
@@ -28,6 +36,9 @@ const transportCache = new NodeCache({
   useClones: false, // MUST MUST include this config to store references instead of cloning objects
   // otherwise the StreamableHTTPServerTransport object will be broken!!!!!(It took me freaking hours to debug and fix this bummer!!!)
 });
+
+// small health endpoint to test the container itself
+app.get('/_health', (_req, res) => res.status(200).send('ok'));
 
 // Handle POST requests for client-to-server communication
 app.post('/mcp', async (req, res) => {
@@ -128,10 +139,11 @@ app.use(
   createProxyMiddleware({
     target: process.env.APP_URL,
     changeOrigin: true,
+    secure: true,
     ws: true,
     pathRewrite: {
       '^/': '/', // optional, keeps paths intact
-    },
+    }
   })
 );
 
