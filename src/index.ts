@@ -82,7 +82,7 @@ app.post('/mcp', async (req, res) => {
 });
 
 function getMongoConnectionString(srvString: string, password: string) {
-  const decodedConnectionString = decodeURIComponent(srvString).replace('mongodb srv', 'mongodb+srv');
+  const decodedConnectionString = decodeURIComponent(decodeURIComponent(srvString)).replace('mongodb srv', 'mongodb+srv');
   const mongoRegex = /^mongodb(?:\+srv)?:\/\/([^:@]+)(?::([^@]*))?@([^\s/]+)\/?/;
   const match = decodedConnectionString.match(mongoRegex);
 
