@@ -6,7 +6,8 @@ import NodeCache from 'node-cache';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-
+import dotenv from "dotenv";
+dotenv.config();
 import { createMcpServer } from './server/index';
 
 const app = express();
@@ -125,7 +126,7 @@ app.delete('/mcp', handleSessionRequest);
 app.use(
   '/',
   createProxyMiddleware({
-    target: 'http://localhost:4200',
+    target: process.env.APP_URL,
     changeOrigin: true,
     ws: true,
     pathRewrite: {
