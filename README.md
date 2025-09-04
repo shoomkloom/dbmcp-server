@@ -15,13 +15,13 @@ Together, they provide a plug-and-play solution for using MongoDB as a knowledge
 ## Features
 
 - 🌐 Online-only usage — no installation required.
-- ⚡ Instant setup with [app.dbmcp.me](https://app.dbmcp.me).
+- ⚡ Instant setup with any ai agent.
 - 🗄️ Direct connection to your MongoDB cluster with MCP compatibility.
 - 🤖 Ready-to-use with AI agents and automation pipelines.
 
 ## Getting Started
 
-1. Go to [app.dbmcp.me](https://app.dbmcp.me).  
+1. Go to [dbmcp.me](https://dbmcp.me).  
 2. Provide your MongoDB connection details.  
 3. MCP configuration details will be created instantly.  
 4. Use the generated MCP server endpoint in your AI agent.
