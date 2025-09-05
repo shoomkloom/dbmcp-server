@@ -5,10 +5,10 @@
 ## Overview
 
 This project allows you to quickly spin up a MongoDB MCP-compatible server without any local installation.  
-It is designed to be used **online only** and integrates seamlessly with [app.dbmcp.me](https://app.dbmcp.me).
+It is designed to be used **online only** and integrates seamlessly with any ai agent.
 
-- **dbmcp-server**: Backend service that exposes MongoDB as an MCP server over the web.  
-- **dbmcp-app**: A companion frontend application that makes it easy to connect, configure, and interact with the server.
+- **Server** (this repo): Backend service that exposes MongoDB as an MCP server over the web.  
+- [**App**](https://github.com/shoomkloom/dbmcp-app): A companion frontend application that makes it easy to connect, configure, and interact with the server.
 
 Together, they provide a plug-and-play solution for using MongoDB as a knowledge and context provider inside AI-driven workflows.
 
@@ -26,17 +26,12 @@ Together, they provide a plug-and-play solution for using MongoDB as a knowledge
 3. MCP configuration details will be created instantly.  
 4. Use the generated MCP server endpoint in your AI agent.
 
-## Repositories
-
-- **Server**: [dbmcp-server](https://github.com/shoomkloom/dbmcp-server) (this repo)  
-- **App**: [dbmcp-app](https://github.com/shoomkloom/dbmcp-app)
-
 ## License
 
-MIT License. See the [LICENSE](LICENSE) file for details.
+MIT License. See the [LICENSE](LICENSE) for details.
 
 Parts of the code were coppied from the official 'mongodb-mcp-server' repo:
 https://github.com/mongodb-js/mongodb-mcp-server
 
-You can find the appropriate License file here:
+You can find the appropriate License here:
 https://github.com/mongodb-js/mongodb-mcp-server/blob/main/LICENSE
