@@ -30,8 +30,6 @@ Together, they provide a plug-and-play solution for using MongoDB as a knowledge
 
 MIT License. See the [LICENSE](LICENSE) for details.
 
-Parts of the code were coppied from the official 'mongodb-mcp-server' repo:
-https://github.com/mongodb-js/mongodb-mcp-server
+Parts of the code were copied from the official [mongodb-mcp-server](https://github.com/mongodb-js/mongodb-mcp-server) repo.
 
-You can find the appropriate License here:
-https://github.com/mongodb-js/mongodb-mcp-server/blob/main/LICENSE
+You can find the License here: [License](https://github.com/mongodb-js/mongodb-mcp-server/blob/main/LICENSE)
