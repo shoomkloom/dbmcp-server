@@ -9,6 +9,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import dotenv from "dotenv";
 dotenv.config();
 import { createMcpServer } from './server/index';
+import { goatCounter } from "./middlewear/goatcounter-middleware";
 
 const app = express();
 app.use(express.json());
@@ -38,7 +39,7 @@ const transportCache = new NodeCache({
 app.get('/_health', (_req, res) => res.status(200).send('ok'));
 
 // Handle POST requests for client-to-server communication
-app.post('/mcp', async (req, res) => {
+app.post('/mcp', goatCounter({}), async (req, res) => {
   const sessionId = req.headers['mcp-session-id'];
   const mongodbPassword = req.query.mongodbpassword as string;
   console.log(`POST /mcp invoked with sessionId = ${sessionId}`);
