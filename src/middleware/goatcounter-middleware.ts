@@ -1,4 +1,3 @@
-// goatcounter-middleware.ts
 type GoatCounterOpts = {
   site?: string;
   token?: string;
@@ -16,19 +15,19 @@ export function goatCounter(opts: GoatCounterOpts = {}) {
 
     return function goatCounterMiddleware(req: any, _res: any, next: any) {
         if (!disabled) {
-        const path = opts.fixedPath || req.path || "/";
+            const path = opts.fixedPath || req.path || "/";
 
-        fetch(`https://${site}/api/v0/count`, {
-            method: "POST",
-            headers: {
-            "content-type": "application/json",
-            authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-            no_sessions: noSessions,
-            hits: [{ path }],
-            }),
-        }).catch(() => { console.warn("GoatCounter logging failed"); });
+            fetch(`https://${site}/api/v0/count`, {
+                method: "POST",
+                headers: {
+                "content-type": "application/json",
+                authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                no_sessions: noSessions,
+                hits: [{ path }],
+                }),
+            }).catch(() => { console.warn("GoatCounter logging failed"); });
         }
         next();
     };

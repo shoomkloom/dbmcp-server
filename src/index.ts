@@ -9,7 +9,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 import dotenv from "dotenv";
 dotenv.config();
 import { createMcpServer } from './server/index';
-import { goatCounter } from "./middlewear/goatcounter-middleware";
+import { goatCounter } from "./middleware/goatcounter-middleware";
 
 const app = express();
 app.use(express.json());
