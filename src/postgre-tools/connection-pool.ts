@@ -17,16 +17,9 @@ export function getPool(connectionString: string) {
         pools.delete(oldestKey);
     }
 
-    let sslRejectUnauthorized = true;
-    if (process.env.NODE_ENV !== 'production') {
-        sslRejectUnauthorized = false;
-        console.warn("Warning: SSL certificate verification is disabled in non-production environments.");
-    }
-
     console.log("Creating new PG connection pool");
     pool = new pg.Pool({
         connectionString,
-        ssl: { rejectUnauthorized: sslRejectUnauthorized },
         keepAlive: true,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 10000,
