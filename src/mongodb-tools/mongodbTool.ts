@@ -11,7 +11,7 @@ export const DbOperationArgs = {
 export abstract class MongoDBToolBase extends ToolBase {
 
     protected connectToMongoDB(): Promise<MongoClient> {
-        const mongoUri = this.context.mongoUri;
+        const mongoUri = this.context.connectionStr;
         if (!mongoUri) {
             throw new Error('No MongoDB URI provided for this session.');
         }

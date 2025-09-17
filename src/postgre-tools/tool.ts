@@ -1,10 +1,10 @@
-import { z, type ZodRawShape, type ZodNever, AnyZodObject } from "zod";
-import type { RegisteredTool, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z, type ZodRawShape, type ZodNever } from "zod";
+import type { ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 
 export type ToolArgs<Args extends ZodRawShape> = z.objectOutputType<Args, ZodNever>;
 
-export type OperationType = "metadata" | "read";
+export type OperationType = "query";
 export type TelemetryToolMetadata = {
     projectId?: string;
     orgId?: string;
@@ -23,8 +23,7 @@ export abstract class ToolBase {
         };
 
         switch (this.operationType) {
-            case "read":
-            case "metadata":
+            case "query":
             default:
                 break;
         }
@@ -54,8 +53,4 @@ export abstract class ToolBase {
             isError: true,
         };
     }
-
-    //@@ protected abstract resolveTelemetryMetadata(
-    //     ...args: Parameters<ToolCallback<typeof this.argsShape>>
-    // ): TelemetryToolMetadata;
 }

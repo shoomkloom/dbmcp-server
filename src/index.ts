@@ -44,9 +44,11 @@ app.post('/mcp', async (req, res) => {
   
   const sessionId = req.headers['mcp-session-id'];
   const mongodbPassword = req.query.mongodbpassword as string;
+  const postgrePassword = req.query.postgrepassword as string;
+  const dbPassword = !mongodbPassword ? postgrePassword : mongodbPassword;
   console.log(`POST /mcp invoked with sessionId = ${sessionId}`);
 
-  const mongoConnectionString = getMongoConnectionString(req.query.srvString as string, mongodbPassword);
+  const result = getConnectionString(req.query.srvString as string, dbPassword);
 
   type SessionData = { transport: StreamableHTTPServerTransport };
   let sessionData: SessionData | null = null;
@@ -68,7 +70,7 @@ app.post('/mcp', async (req, res) => {
     };
 
     // Create a fresh MCP server instance with the per-session mongoUri
-    const mcpServer = createMcpServer({ mongoUri: mongoConnectionString });
+    const mcpServer = createMcpServer({ connectionStr: result.connectionString, dbtype: result.dbtype });
     await mcpServer.connect(transport);
   } 
   else if (!sessionData || !sessionData.transport) {
@@ -93,23 +95,42 @@ app.post('/mcp', async (req, res) => {
   }
 });
 
-function getMongoConnectionString(srvString: string, password: string) {
+function getConnectionString(srvString: string, password: string): { connectionString: string, dbtype: string } {
   const decodedConnectionString = decodeURIComponent(decodeURIComponent(srvString)).replace('mongodb srv', 'mongodb+srv');
   const mongoRegex = /^mongodb(?:\+srv)?:\/\/([^:@]+)(?::([^@]*))?@([^\s/]+)\/?/;
-  const match = decodedConnectionString.match(mongoRegex);
+  const mongoMatch = decodedConnectionString.match(mongoRegex);
 
-  if(match) {
-    const username = match[1];
+  if(mongoMatch) {
+    const username = mongoMatch[1];
     if(decodedConnectionString.startsWith('mongodb+srv://')) {
-      return decodedConnectionString.replace(`mongodb+srv://${username}`, `mongodb+srv://${username}:${password}`);
+      return { 
+        connectionString: decodedConnectionString.replace(`mongodb+srv://${username}`, `mongodb+srv://${username}:${password}`), 
+        dbtype: 'mongodb' 
+      };
     }
     else if(decodedConnectionString.startsWith('mongodb://')) {
-      return decodedConnectionString.replace(`mongodb://${username}`, `mongodb://${username}:${password}`);
+      return { 
+        connectionString: decodedConnectionString.replace(`mongodb://${username}`, `mongodb://${username}:${password}`), 
+        dbtype: 'mongodb' 
+      };
     }
   }
-  else{
-    throw new Error("Invalid SRV string format");
+
+  const postgreRegex = /^(postgresql?:\/\/)([^:]+)(?::([^@]*))?@(.*)$/;
+  const postgreMatch = decodedConnectionString.match(postgreRegex);
+
+  if(postgreMatch) {
+    const username = postgreMatch[2];
+    if(decodedConnectionString.startsWith('postgresql://')) {
+      const fullConnectionString = decodedConnectionString.replace(`postgresql://${username}`, `postgresql://${username}:${password}`);
+      return { 
+        connectionString: fullConnectionString, 
+        dbtype: 'postgres' 
+      };
+    }
   }
+
+  throw new Error("Invalid SRV string format");
 }
 
 // Reusable handler for GET and DELETE requests

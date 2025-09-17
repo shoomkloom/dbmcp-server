@@ -1,33 +1,33 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-//@@import { createListMongoTool } from '../tools/index.js';
-import { MongoDbTools } from "../tools/tools";
+import { MongoDbTools } from "../mongodb-tools/tools";
+import { PostgreTools } from '../postgre-tools/tools';
 
-export function createMcpServer(context: any) {
+type Context =  { connectionStr: string, dbtype: string };
+
+export function createMcpServer(context: Context) {
   const server = new McpServer({
     name: 'dbmcp-server',
     version: '1.0.0',
   });
 
-  // Pass context to the tool so it can use the mongoUri
-  //@@ const tool = createListMongoTool(context);
-  // server.registerTool(tool.name, { ...tool }, tool.execute);
+  // Pass context to the tool so it can use the connection string
   registerTools(server, context);
-
   return server;
 }
 
-//@@ function registerTools(server: McpServer, context: any) {
-//     for (const toolConstructor of [...MongoDbTools]) {
-//         const tool = new toolConstructor(context);
-//         server.registerTool(tool.name, { ...tool }, tool.execute);
-//     }
-// }
-
-function registerTools(server: McpServer, context: any) {
+function registerTools(server: McpServer, context: Context) {
+  if(context.dbtype === 'mongodb') {
     for (const toolConstructor of [...MongoDbTools]) {
-        const tool = new toolConstructor(context);
-        tool.registerTool(server);
+      const tool = new toolConstructor(context);
+      tool.registerTool(server);
     }
+  }
+  else if(context.dbtype === 'postgres') {
+    for (const toolConstructor of [...PostgreTools]) {
+      const tool = new toolConstructor(context);
+      tool.registerTool(server);
+    }
+  }
 }
 
 // -> Register the resources

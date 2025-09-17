@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.3",
+    "@types/pg": "^8.15.5",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
@@ -28,6 +29,7 @@
     "mongodb-log-writer": "^2.4.1",
     "mongodb-redact": "^1.1.8",
     "mongodb-schema": "^12.6.2",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "pg": "^8.16.3"
   }
 }
