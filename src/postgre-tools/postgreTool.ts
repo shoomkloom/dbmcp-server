@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ToolBase } from "./tool";
 import pg from "pg";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { getPool } from "./connection-pool";
 
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
@@ -18,12 +19,8 @@ export abstract class PostgreToolBase extends ToolBase {
 
         console.log(`Connecting to PostgreSQL...`);
 
-        const pool = new pg.Pool({
-            connectionString: postgreUri,
-        });
-
-        const client = await pool.connect();
-        return client;
+        const pool = getPool(postgreUri);
+        return await pool.connect();
     }
 
     public registerTool(server: McpServer) {
