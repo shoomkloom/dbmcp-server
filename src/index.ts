@@ -10,8 +10,6 @@ import dotenv from "dotenv";
 dotenv.config();
 import { createMcpServer } from './server/index';
 import { countGoatCounterHit } from "./goat-counter/goatcounter-helper";
-import dns from "dns";
-dns.setDefaultResultOrder("ipv4first");
 
 const app = express();
 app.use(express.json());

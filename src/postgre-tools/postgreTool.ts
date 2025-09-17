@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ToolBase } from "./tool";
 import pg from "pg";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import dns from "dns";
 
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
@@ -18,10 +19,11 @@ export abstract class PostgreToolBase extends ToolBase {
 
         console.log(`Connecting to PostgreSQL...`);
 
-        const pool = new pg.Pool({
-            connectionString: postgreUri,
-        });
-
+        //Force IPv4 resolution to avoid IPv6 issues on some platforms
+        const url = new URL(postgreUri);
+        const { address } = await dns.promises.lookup(url.hostname, { family: 4 });
+        url.hostname = address;
+        const pool = new pg.Pool({ connectionString: url.toString(), ssl: { rejectUnauthorized: true } });
         const client = await pool.connect();
         return client;
     }
