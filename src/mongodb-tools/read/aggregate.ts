@@ -26,7 +26,14 @@ export class AggregateTool extends MongoDBToolBase {
     }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         //Block write-capable stages anywhere in the pipeline tree
         if (this.containsWriteStage(pipeline)) {
-            throw new Error("Write stages ($out/$merge) are not permitted in read-only mode.");
+            return {
+                content: [
+                    {
+                        text: `Aggregate write stages ($out/$merge) are not permitted on DBMCP.`,
+                        type: "text",
+                    },
+                ],
+            };
         }
 
         const client = await this.connectToMongoDB();
