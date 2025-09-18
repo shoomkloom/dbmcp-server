@@ -3,7 +3,8 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { DbOperationArgs, MongoDBToolBase } from "../mongodbTool";
 import { ToolArgs, OperationType } from "../tool";
 import { EJSON } from "bson";
-import { checkIndexUsage } from "../../helpers/indexCheck";
+
+const WRITE_STAGE_KEYS = new Set<string>(["$out", "$merge"]);
 
 export const AggregateArgs = {
     pipeline: z.array(z.object({}).passthrough()).describe("An array of aggregation stages to execute"),
@@ -23,6 +24,11 @@ export class AggregateTool extends MongoDBToolBase {
         collection,
         pipeline,
     }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
+        //Block write-capable stages anywhere in the pipeline tree
+        if (this.containsWriteStage(pipeline)) {
+            throw new Error("Write stages ($out/$merge) are not permitted in read-only mode.");
+        }
+
         const client = await this.connectToMongoDB();
         const db = client.db(database);
         const col = db.collection(collection);
@@ -51,5 +57,23 @@ export class AggregateTool extends MongoDBToolBase {
         return {
             content,
         };
+    }
+
+    protected containsWriteStage(node: unknown): boolean {
+        if (!node) return false;
+
+        if (Array.isArray(node)) {
+            for (const v of node) if (this.containsWriteStage(v)) return true;
+            return false;
+        }
+
+        if (typeof node === "object") {
+            for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+                if (WRITE_STAGE_KEYS.has(k)) return true;
+                if (this.containsWriteStage(v)) return true; // recurse into nested pipelines (e.g., $facet/$unionWith)
+            }
+        }
+
+        return false;
     }
 }
