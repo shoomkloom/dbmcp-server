@@ -1,9 +1,9 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { PostgreToolBase } from "../postgreTool";
+import { MysqlToolBase } from "../mysqlTool";
 import { z } from "zod";
 import { ToolArgs, OperationType } from "../tool";
 
-export class ColumnTypesTool extends PostgreToolBase {
+export class ColumnTypesTool extends MysqlToolBase {
     public name = "column-types";
     protected description = "Get the column types of a specified table";
     protected argsShape = {
@@ -13,20 +13,20 @@ export class ColumnTypesTool extends PostgreToolBase {
     public operationType: OperationType = "query";
 
     protected async execute({ table }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        const client = await this.connectToPostgre();
+        const client = await this.connectToMySQL();
         try {
-            await client.query("BEGIN TRANSACTION READ ONLY");
-            const result = await client.query(
+            const [rows] = await client.query(
                 `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = ?`, 
                 [table]
             );
+
             return {
                 content: [
-                    { 
-                        type: "text", 
-                        text: JSON.stringify(result.rows, null, 2)
-                    }
-                ]
+                    {
+                        type: "text",
+                        text: JSON.stringify(rows, null, 2),
+                    },
+                ],
             };
         } 
         catch (error) {

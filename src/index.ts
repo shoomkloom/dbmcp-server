@@ -43,9 +43,11 @@ app.post('/mcp', async (req, res) => {
   countGoatCounterHit({}, '/mcp');
   
   const sessionId = req.headers['mcp-session-id'];
-  const mongodbPassword = req.query.mongodbpassword as string;
-  const postgrePassword = req.query.postgrepassword as string;
-  const dbPassword = !mongodbPassword ? postgrePassword : mongodbPassword;
+  const dbPassword =
+    req.query.mongodbpassword as string ||
+    req.query.postgrepassword as string ||
+    req.query.mysqlpassword as string || '';
+  
   console.log(`POST /mcp invoked with sessionId = ${sessionId}`);
 
   const result = getConnectionString(req.query.srvString as string, dbPassword);
@@ -116,16 +118,17 @@ function getConnectionString(srvString: string, password: string): { connectionS
     }
   }
 
-  const postgreRegex = /^(postgresql?:\/\/)([^:]+)(?::([^@]*))?@(.*)$/;
-  const postgreMatch = decodedConnectionString.match(postgreRegex);
-
-  if(postgreMatch) {
-    const username = postgreMatch[2];
-    if(decodedConnectionString.startsWith('postgresql://')) {
-      const fullConnectionString = decodedConnectionString.replace(`postgresql://${username}`, `postgresql://${username}:${password}`);
+  const sqldbRegex = /^((postgresql|mysql|mariadb|sqlserver):\/\/)([^:]+)(?::([^@]*))?@(.*)$/;
+  const sqldbMatch = decodedConnectionString.match(sqldbRegex);
+  if(sqldbMatch) {
+    const dbschema = sqldbMatch[1];
+    const dbtype = sqldbMatch[2];
+    const username = sqldbMatch[3];
+    if(decodedConnectionString.startsWith(dbschema)) {
+      const fullConnectionString = decodedConnectionString.replace(`${dbschema}${username}`, `${dbschema}${username}:${password}`);
       return { 
         connectionString: fullConnectionString, 
-        dbtype: 'postgres' 
+        dbtype: dbtype 
       };
     }
   }

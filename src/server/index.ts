@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { MongoDbTools } from "../mongodb-tools/tools";
 import { PostgreTools } from '../postgre-tools/tools';
+import { MysqlTools } from '../mysql-tools/tools';
 
 type Context =  { connectionStr: string, dbtype: string };
 
@@ -22,8 +23,14 @@ function registerTools(server: McpServer, context: Context) {
       tool.registerTool(server);
     }
   }
-  else if(context.dbtype === 'postgres') {
+  else if(context.dbtype === 'postgresql') {
     for (const toolConstructor of [...PostgreTools]) {
+      const tool = new toolConstructor(context);
+      tool.registerTool(server);
+    }
+  }
+  else if(context.dbtype === 'mysql') {
+    for (const toolConstructor of [...MysqlTools]) {
       const tool = new toolConstructor(context);
       tool.registerTool(server);
     }
