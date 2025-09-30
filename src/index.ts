@@ -118,12 +118,11 @@ function getConnectionString(srvString: string, password: string): { connectionS
     }
   }
 
-  const sqldbRegex = /^((postgresql|mysql|mariadb|sqlserver):\/\/)([^:]+)(?::([^@]*))?@(.*)$/;
+  const sqldbRegex = /^((postgresql|mysql):\/\/)([^:]+)(?::([^@]*))?@(.*)$/;
   const sqldbMatch = decodedConnectionString.match(sqldbRegex);
   if(sqldbMatch) {
-    const dbschema = sqldbMatch[1];
-    const dbtype = sqldbMatch[2];
-    const username = sqldbMatch[3];
+    const [, dbschema, dbtype, username, , ] = sqldbMatch;
+
     if(decodedConnectionString.startsWith(dbschema)) {
       const fullConnectionString = decodedConnectionString.replace(`${dbschema}${username}`, `${dbschema}${username}:${password}`);
       return { 
